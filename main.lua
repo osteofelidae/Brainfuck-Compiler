@@ -8,17 +8,24 @@ memoryIndex = 0
 -- Program files
 allowedChars = {">", "<", "+", "-", ".", ",", "[", "]"}
 filePath = ""
+fileDataRaw = ""
 
 -- Program execution
 programList = {}
 programIndex = 0
 printOutput = ""
+stepCount = 0
+
+loop = true -- Variable for loop
 
 -- Preference variables
 allowNegativeMemoryValues = false -- Allow negative memory values in programList
 printActionSteps = true -- Print action steps
 alwaysShowPrintOutput = true -- Print print output after every step
 filterInput = true -- Ignore unwanted characters in input program
+showMemoryLocations = true -- Show memory location diagram on each step
+memoryLocationSlotsDisplay = 9 -- Max number of memory slots shown
+memoryLocationsDigitsShown = 5 -- Number of digits shown on each memory slot
 
 
 
@@ -31,7 +38,13 @@ function consolePrint(type, text, content)
 	if type == "STEP" then
 
 		-- Print divider
-		print("-+----------------------------------------------+-")
+		print("")
+
+		-- Print step number
+		print("------> Step "..tostring(stepCount))
+
+		-- Increment step count
+		stepCount = stepCount + 1
 
 	end
 
@@ -46,15 +59,106 @@ function consolePrint(type, text, content)
 
 	end
 
-	-- If step and print output enables
+	-- If step and print output enabled
 	if type == "STEP" and alwaysShowPrintOutput then
 
 		-- Print print output
-		print("   Current print output: "..printOutput)
+		print("   [NOTE] Current print output: "..printOutput)
+
+	end
+
+	-- If step and show memory locations enabled
+	if type == "STEP" and showMemoryLocations then
+
+		-- Print memory locations
+		print("   [NOTE] "..memoryLocationsString())
 
 	end
 
 end
+
+-- Number format
+function numberFormat(number, digits)
+
+	-- Change number to string
+	number = tostring(number)
+
+	-- If number is shorter than set digits
+	if string.len(number) < digits then
+
+		-- Add '0' digits to beginning of string
+		for i = 1,(digits - string.len(number)) do
+
+			-- Append '0' digit
+			number = "0"..number
+
+		end
+
+	end
+
+	return number
+
+end
+
+
+-- Memory locations to string
+function memoryLocationsString()
+
+	-- Output variable
+	local outString = "Current memory contents: "
+
+	-- Offset radius
+	local radius = math.floor(memoryLocationSlotsDisplay / 2)
+
+	-- Start and end
+	local startIndex = math.max(0, memoryIndex - radius)
+	local endIndex = math.min(#memoryList, memoryIndex + radius)
+
+	-- If start index is larger than 0
+	if startIndex > 0 then
+
+		-- Append ...
+		outString = outString.."... "
+
+	end
+
+	-- For loop from start to end
+	for index = startIndex, endIndex do
+
+		outString = outString.."["..numberFormat(memoryList[index], memoryLocationsDigitsShown).."] "
+
+	end
+
+	-- If start index is larger than 0
+	if endIndex < #memoryList - 1 then
+
+		-- Append ...
+		outString = outString.."..."
+
+	end
+
+	-- New line + 3 spaces
+	outString = outString.."\n   "
+
+	-- Add preliminary spaces
+	outString = outString..string.rep(" ", 32)
+
+	-- Add offset spaces for start dots
+	if startIndex > 0 then
+
+		-- Add 4 spaces
+		outString = outString..string.rep(" ", 4)
+
+	end
+
+	-- Add offset spaces and cursor
+	outString = outString..string.rep(" ", (memoryIndex - startIndex)*(3 + memoryLocationsDigitsShown) + math.ceil(memoryLocationsDigitsShown/2)).."^"
+
+	-- Return result
+	return outString
+
+end
+
 
 -- Check if char is valud
 function checkChar(char)
@@ -80,11 +184,53 @@ function checkChar(char)
 
 end
 
--- Get file path as input
-function requestFilePath()
+-- Get file contents as command line argument
+function getFilePath()
 
-	-- Set file path to input
-	filePath = io.read()
+	-- If arg is provided
+	if arg[1] ~= nil then
+
+		-- Nested function to read file path
+		function readFilePath()
+
+			-- Open command line argument as path
+			local file = io.open(arg[1])
+
+			-- Set file as default input
+			io.input(file)
+
+			-- Read file into memory
+			fileDataRaw = io.read("*all")
+
+			-- Close file
+			io.close(file)
+
+			-- Set default input to stdin
+			io.input(io.stdin)
+
+		end
+
+		-- Protected call nested function
+		if pcall(readFilePath) then
+
+			-- Return true if success
+			return true
+
+		-- If unsuccessful
+		else
+
+			-- Return false
+			return false
+
+		end
+
+	-- If command line arg is not provided
+	else
+
+		-- Return false
+		return false
+
+	end
 
 end
 
@@ -130,7 +276,7 @@ function runString(program)
 	index = 0
 
 	-- While index is smaller than program length
-	while programIndex < #programList do
+	while programIndex <= #programList do
 
 		-- Execute current character
 		runChar(programList[programIndex])
@@ -139,6 +285,12 @@ function runString(program)
 		programIndex = programIndex + 1
 
 	end
+
+	-- Print ending prompt
+	consolePrint("STEP", "Program ended. Press enter to exit.")
+
+	-- Wait for input before exiting
+	io.read()
 
 end
 
@@ -318,13 +470,33 @@ function runChar(char)
 
 end
 
+-- Print header (NONFUNCTIONAL)
+function printHeader()
+
+	
+
+end
+
+-- Print main menu (NONFUNCTIONAL)
+function printMainMenu()
+
+	print("test")
+
+end
+
 
 
 -- MAIN
-runString(io.read())
 
-while true do
+-- If command line arg provided and read successfully
+if getFilePath() then
 
-	
+	-- Run input file data
+	runString(fileDataRaw)
+
+-- If command line arg not provided
+else
+
+	printMainMenu()
 
 end

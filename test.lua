@@ -1,28 +1,61 @@
-program = "abcde+-<>"
+fileDataRaw = "init"
 
-print(string.byte(program))
 
-program = string.sub(program,2)
+print(arg[1])
 
-print(string.byte(program)	)
+-- Get file contents as command line argument
+function getFilePath()
 
-index = 0
-array = {}
+	-- If arg is provided
+	if arg[1] ~= nil then
 
-while string.len(program)>0 do
+		print("YESSS")
 
-	array[index] = string.sub(program, 1, 1)
-	program = string.sub(program,2)
-	index = index + 1
+		-- Nested function to read file path
+		function readFilePath()
+
+			-- Open command line argument as path
+			file = io.read(arg[1])
+
+			-- Set file as default input
+			io.input(file)
+
+			-- Read file into memory
+			print(io.read("*all"))
+			fileDataRaw = io.read("*all")
+
+			-- Close file
+			io.close(file)
+
+			-- Set default input to stdin
+			io.input(io.stdin)
+
+		end
+
+		-- Protected call nested function
+		if pcall(readFilePath) then -- problem with pcall
+
+		else
+
+			print("ERROR")
+
+		end
+
+	-- If command line arg is not provided
+	else
+
+		-- TODO
+
+	end
 
 end
 
-for x = 1,10 do
+getFilePath()
 
-	print(array[x])
+pcall(print, "hello")
 
-end
+print(fileDataRaw)
 
-while true do
+print("Done")
 
-end
+io.read()
