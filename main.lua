@@ -5,6 +5,7 @@ HEADER =
 BRAINFUCK
 COMPILER
 
+https://github.com/osteofelidae/Brainfuck-Compiler
 Made with pride by Osteofelidae (c) 2023
 ==========================================
 ]]
@@ -119,7 +120,6 @@ function numberFormat(number, digits)
 
 end
 
-
 -- Memory locations to string
 function memoryLocationsString()
 
@@ -177,7 +177,6 @@ function memoryLocationsString()
 	return outString
 
 end
-
 
 -- Check if char is valud
 function checkChar(char)
@@ -487,7 +486,7 @@ function runChar(char)
 				-- Else if opening bracket
 				elseif programList[programIndex] == "[" then
 
-				-- Increment bracketLevel
+					-- Increment bracketLevel
 					bracketLevel = bracketLevel - 1
 
 				end
@@ -525,10 +524,10 @@ function runChar(char)
 		end
 
 		-- Print current memory location
-		consolePrint("OUTPUT", string.char(memoryList[memoryIndex]), nil)
+		consolePrint("OUTPUT", utf8.char(memoryList[memoryIndex]), nil) -- TODO
 
 		-- Add output to print output variable
-		printOutput = printOutput..string.char(memoryList[memoryIndex])
+		printOutput = printOutput..utf8.char(memoryList[memoryIndex])
 
 	else
 
@@ -546,6 +545,8 @@ function printHeader()
 	print(HEADER)
 
 end
+
+
 
 -- MAIN
 
