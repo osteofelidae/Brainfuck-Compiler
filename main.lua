@@ -1,3 +1,16 @@
+-- HEADER
+HEADER =
+[[   
+==========================================                                             
+BRAINFUCK
+COMPILER
+
+Made with pride by Osteofelidae (c) 2023
+==========================================
+]]
+
+
+
 -- VARIABLES
 
 -- Memory simulation
@@ -26,6 +39,7 @@ filterInput = true -- Ignore unwanted characters in input program
 showMemoryLocations = true -- Show memory location diagram on each step
 memoryLocationSlotsDisplay = 9 -- Max number of memory slots shown
 memoryLocationsDigitsShown = 5 -- Number of digits shown on each memory slot
+suppressOutput = false -- Suppress most output
 
 
 
@@ -34,45 +48,49 @@ memoryLocationsDigitsShown = 5 -- Number of digits shown on each memory slot
 -- Console print with formatting
 function consolePrint(type, text, content)
 
-	-- If step
-	if type == "STEP" then
+	-- If not suppressOutput
+	if not suppressOutput then
 
-		-- Print divider
-		print("")
+		-- If step
+		if type == "STEP" then
 
-		-- Print step number
-		print("------> Step "..tostring(stepCount))
+			-- Print divider
+			print("")
 
-		-- Increment step count
-		stepCount = stepCount + 1
+			-- Print step number
+			print("------> Step "..tostring(stepCount))
 
-	end
+			-- Increment step count
+			stepCount = stepCount + 1
 
-	-- Print first line
-	print("   ["..type.."]".." "..text)
+		end
 
-	-- If second line exists
-	if content ~= nil then
+		-- Print first line
+		print("   ["..type.."]".." "..text)
 
-		-- Print second line
-		print("   "..content)
+		-- If second line exists
+		if content ~= nil then
 
-	end
+			-- Print second line
+			print("   "..content)
 
-	-- If step and print output enabled
-	if type == "STEP" and alwaysShowPrintOutput then
+		end
 
-		-- Print print output
-		print("   [NOTE] Current print output: "..printOutput)
+		-- If step and print output enabled
+		if type == "STEP" and alwaysShowPrintOutput then
 
-	end
+			-- Print print output
+			print("   [NOTE] Current print output: "..printOutput)
 
-	-- If step and show memory locations enabled
-	if type == "STEP" and showMemoryLocations then
+		end
 
-		-- Print memory locations
-		print("   [NOTE] "..memoryLocationsString())
+		-- If step and show memory locations enabled
+		if type == "STEP" and showMemoryLocations then
 
+			-- Print memory locations
+			print("   [NOTE] "..memoryLocationsString())
+
+		end
 	end
 
 end
@@ -234,6 +252,34 @@ function getFilePath()
 
 end
 
+-- Get flag
+function getFlag()
+
+	-- Fast flag
+	if arg[2] == "f" then
+
+		printActionSteps = false -- Print action steps
+		alwaysShowPrintOutput = false -- Print print output after every step
+		memoryLocationSlotsDisplay = 0 -- Max number of memory slots shown
+		showMemoryLocations = false
+		memoryLocationsDigitsShown = 0 -- Number of digits shown on each memory slot
+		suppressOutput = true
+
+	-- If slow flag
+	elseif arg[2] == "s" then
+
+		-- Do nothing
+
+	-- If not recognized
+	else
+
+		-- Print error
+		consolePrint("WARN", "Flag not recognized. Only (f)ast or (s)low are supported. Will defailt to (s)low.")
+
+	end
+
+end
+
 -- Execute an array
 function runString(program)
 
@@ -286,8 +332,14 @@ function runString(program)
 
 	end
 
+	-- Enable output
+	suppressOutput = false
+
 	-- Print ending prompt
 	consolePrint("STEP", "Program ended. Press enter to exit.")
+
+	-- Final output
+	consolePrint("OUTPUT", "Final output: "..printOutput)
 
 	-- Wait for input before exiting
 	io.read()
@@ -463,7 +515,7 @@ function runChar(char)
 	else
 
 		-- Print error
-		--consolePrint("STEP", "Unrecognized character", nil)
+		consolePrint("STEP", "Unrecognized character", nil)
 		consolePrint("ERROR", "Unrecognized character '"..char.. "' at location "..tostring(programIndex), nil)
 
 	end
@@ -473,20 +525,14 @@ end
 -- Print header (NONFUNCTIONAL)
 function printHeader()
 
-	
+	print(HEADER)
 
 end
-
--- Print main menu (NONFUNCTIONAL)
-function printMainMenu()
-
-	print("test")
-
-end
-
-
 
 -- MAIN
+
+-- Get flag
+getFlag()
 
 -- If command line arg provided and read successfully
 if getFilePath() then
@@ -497,6 +543,22 @@ if getFilePath() then
 -- If command line arg not provided
 else
 
-	printMainMenu()
+	-- Print header
+	printHeader()
+
+	-- Print instructions
+	consolePrint("NOTE", "Instructions:", "Input file path... ")
+
+	-- Print prompt
+	io.write(">>>")
+
+	-- Get file input
+	arg[1] = io.read()
+
+	-- Get file path
+	getFilePath()
+
+	-- Run
+	runString(fileDataRaw)
 
 end
