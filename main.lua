@@ -40,6 +40,7 @@ showMemoryLocations = true -- Show memory location diagram on each step
 memoryLocationSlotsDisplay = 9 -- Max number of memory slots shown
 memoryLocationsDigitsShown = 5 -- Number of digits shown on each memory slot
 suppressOutput = false -- Suppress most output
+nestedLoops = true -- Nested loops are enabled
 
 
 
@@ -336,7 +337,7 @@ function runString(program)
 	suppressOutput = false
 
 	-- Print ending prompt
-	consolePrint("STEP", "Program ended. Press enter to exit.")
+	consolePrint("STEP", "Program ended. Press enter to continue.")
 
 	-- Final output
 	consolePrint("OUTPUT", "Final output: "..printOutput)
@@ -465,14 +466,31 @@ function runChar(char)
 	-- Loop end
 	elseif char == "]" then
 
+		-- Bracket level
+		local bracketLevel = 1
+
 		-- If current character is not 0
 		if memoryList[memoryIndex] ~= 0 then
 
 			-- While current character is not loop start character
-			while programList[programIndex] ~= "[" do
+			while bracketLevel > 0 do
 
 				-- Decrement memory index
 				programIndex = programIndex - 1
+
+				-- If closing bracket
+				if programList[programIndex] == "]" and nestedLoops then
+
+					-- Increment bracketLevel
+					bracketLevel = bracketLevel + 1
+
+				-- Else if opening bracket
+				elseif programList[programIndex] == "[" then
+
+				-- Increment bracketLevel
+					bracketLevel = bracketLevel - 1
+
+				end
 
 			end
 
